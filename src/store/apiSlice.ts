@@ -8,8 +8,8 @@ const baseQuery = fetchBaseQuery({
   baseUrl: BASE_URL,
   prepareHeaders: (headers, { getState }) => {
     // Add authentication token if available
-    const token = (getState() as RootState).auth?.refreshToken;
-    console.log("token",token)
+    const token = (getState() as RootState).auth?.accessToken;
+    console.log("accessToken", token);
     if (token) {
       headers.set('authorization', `Bearer ${token}`);
     }
@@ -44,8 +44,8 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
 
       if (refreshResult.data) {
         // Store the new token
-        const { refreshToken, expiresIn } = refreshResult.data as any;
-        api.dispatch(refreshTokenSuccess({ refreshToken, expiresIn }));
+        const { accessToken, expiresIn } = refreshResult.data as any;
+        api.dispatch(refreshTokenSuccess({ accessToken, expiresIn }));
         
         // Retry the original query with new token
         result = await baseQuery(args, api, extraOptions);
@@ -107,8 +107,8 @@ export const apiSlice = createApi({
     }),
 
     refreshToken: builder.mutation<
-      { refreshToken: string; expiresIn: number },
-      
+      { accessToken: string; expiresIn: number },
+      { refreshToken: string }
     >({
       query: (data) => ({
         url: '/api/v1/auth/refresh-token',

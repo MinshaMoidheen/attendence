@@ -16,7 +16,10 @@ export const userApiSlice = apiSlice.injectEndpoints({
             query: ({ page, limit }) => ({
               url: USERS_URL,
               method: "GET",
-              params: { page, limit },
+              params: { 
+                limit, 
+                offset: (page - 1) * limit 
+              },
             }),
           }),
       

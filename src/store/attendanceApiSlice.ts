@@ -296,8 +296,16 @@ export const attendanceApiSlice = createApi({
     // Get attendance coordinates
     getAttendanceCoordinates: builder.query<
       {
-        coordinates: AttendanceCoordinate[];
+        attendanceCoordinates: AttendanceCoordinate[];
         total: number;
+        limit: number;
+        offset: number;
+        pagination: {
+          currentPage: number;
+          totalPages: number;
+          hasMore: boolean;
+          totalItems: number;
+        };
       },
       void
     >({
