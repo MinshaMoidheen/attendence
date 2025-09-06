@@ -47,6 +47,12 @@ const navItems: NavItem[] = [
         path: "/attendance-coordinates",
         pro: false
       },
+      
+      {
+        name: "Tasks",
+        path: "/tasks/kanban",
+        pro: false
+      },
     ]
   },
   {
