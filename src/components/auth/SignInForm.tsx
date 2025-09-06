@@ -26,39 +26,49 @@ export default function SignInForm() {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const [loginUser, { isLoading: isLoginLoading }] = useLoginMutation();
+  const [loginUser, { isLoading: isLoginLoading }] = 
+  useLoginMutation();
 
   const handleSubmit = async () => {
     setError("");
     setSuccess(false);
     setIsLoading(true);
 
+    // Validate input
+    if (!email || !password) {
+      setError("Please enter both email and password");
+      setIsLoading(false);
+      return;
+    }
+
     try {
+      console.log("Attempting login with:", { email, password: "***" });
       const response = await loginUser({ email, password });
-      console.log("response login:", response);
+      console.log("Full response:", response);
       
-      if (response.data) {
+      if ('data' in response && response.data) {
         const responseData = response.data as any;
         const { message, user, userType, accessToken, refreshToken, expiresIn } = responseData;
         
+        // Map user data to match the expected User interface
+        const mappedUser = {
+          id: user._id || user.id,
+          email: user.email,
+          name: user.name || user.designation || user.email, // Admin has 'name', User has 'designation'
+          role: user.role || userType,
+          avatar: user.avatar || user.profilePicture,
+          permissions: user.permissions || [],
+          userType: userType || 'user'
+        };
+        
         // Store login data in Redux
         dispatch(loginSuccess({
-          user,
+          user: mappedUser,
           accessToken,
           refreshToken,
           expiresIn,
           userType: userType || 'user' // Default to 'user' if not provided
         }));
-        
-        // Also store in AuthContext for backward compatibility
-        // if (login) {
-        //   login({
-        //     user,
-        //     accessToken,
-        //     refreshToken,
-        //     expiresIn
-        //   });
-        // }
         
         setSuccess(true);
         
@@ -67,12 +77,20 @@ export default function SignInForm() {
           router.push("/");
         }, 1000);
         
+      } else if ('error' in response) {
+        // Handle RTK Query error response
+        const errorData = response.error as any;
+        console.log("Error data:", errorData);
+        const errorMessage = errorData?.data?.message || errorData?.message || "Invalid email or password";
+        setError(errorMessage);
       } else {
         setError("Invalid email or password");
       }
     } catch (err: any) {
       console.log("Login error:", err);
-      setError(err?.data?.message || "An error occurred during login");
+      // Handle both RTK Query error format and direct error format
+      const errorMessage = err?.data?.message || err?.message || "An error occurred during login";
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

@@ -15,11 +15,15 @@ const baseQuery = fetchBaseQuery({
     headers.set('Content-Type', 'application/json');
     return headers;
   },
+  // Add credentials to include cookies
+  credentials: 'include',
 });
 
 // Enhanced base query with token refresh logic
 const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
+  console.log('Making API request:', args);
   let result = await baseQuery(args, api, extraOptions);
+  console.log('API response:', result);
 
   // If we get a 401, try to refresh the token
   if (result.error && result.error.status === 401) {
@@ -29,7 +33,7 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
       // Try to refresh the token
       const refreshResult = await baseQuery(
         {
-          url: '/auth/refresh',
+          url: '/api/v1/auth/refresh-token',
           method: 'POST',
           body: { refreshToken },
         },
@@ -77,7 +81,7 @@ export const apiSlice = createApi({
       { email: string; password: string }
     >({
       query: (credentials) => ({
-        url: '/auth/login',
+        url: '/api/v1/auth/login',
         method: 'POST',
         body: credentials,
       }),
@@ -106,7 +110,7 @@ export const apiSlice = createApi({
       { refreshToken: string }
     >({
       query: (data) => ({
-        url: '/auth/refresh',
+        url: '/api/v1/auth/refresh-token',
         method: 'POST',
         body: data,
       }),
@@ -114,7 +118,7 @@ export const apiSlice = createApi({
 
     logout: builder.mutation<void, void>({
       query: () => ({
-        url: '/auth/logout',
+        url: '/api/v1/auth/logout',
         method: 'POST',
       }),
       invalidatesTags: ['Auth', 'User'],
@@ -122,13 +126,13 @@ export const apiSlice = createApi({
 
     // User profile endpoints
     getProfile: builder.query<any, void>({
-      query: () => '/auth/profile',
+      query: () => '/api/v1/auth/profile',
       providesTags: ['Profile'],
     }),
 
     updateProfile: builder.mutation<any, Partial<any>>({
       query: (profileData) => ({
-        url: '/auth/profile',
+        url: '/api/v1/auth/profile',
         method: 'PUT',
         body: profileData,
       }),
@@ -141,7 +145,7 @@ export const apiSlice = createApi({
       { currentPassword: string; newPassword: string }
     >({
       query: (passwordData) => ({
-        url: '/auth/change-password',
+        url: '/api/v1/auth/change-password',
         method: 'POST',
         body: passwordData,
       }),
@@ -153,7 +157,7 @@ export const apiSlice = createApi({
       { email: string }
     >({
       query: (data) => ({
-        url: '/auth/forgot-password',
+        url: '/api/v1/auth/forgot-password',
         method: 'POST',
         body: data,
       }),
@@ -165,7 +169,7 @@ export const apiSlice = createApi({
       { token: string; password: string }
     >({
       query: (data) => ({
-        url: '/auth/reset-password',
+        url: '/api/v1/auth/reset-password',
         method: 'POST',
         body: data,
       }),
