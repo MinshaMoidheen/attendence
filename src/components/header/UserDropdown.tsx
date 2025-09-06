@@ -23,8 +23,9 @@ function toggleDropdown(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
 
   const handleLogout = () => {
     logout();
-    closeDropdown();
     router.push("/signin");
+    closeDropdown();
+    
   };
   return (
     <div className="relative">
