@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 import Alert from "@/components/ui/alert/Alert";
 import { useSelector } from "react-redux";
 import { selectUser } from "@/store/authentication";
+import { useRouter } from "next/navigation";
 
 interface Employees {
     email: string;
@@ -37,10 +38,12 @@ export default function AddEmployee() {
         }
     });
 
+
     const [createUser, {isLoading: isUserCreating}] = useCreateUserMutation();
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const currentUser = useSelector(selectUser);
+    const router = useRouter();
 
     console.log("current ser",currentUser)
 
@@ -96,6 +99,14 @@ export default function AddEmployee() {
         try {
             const response = await createUser(userData);
             console.log("Response:", response);
+
+           
+      reset();
+      
+      // Redirect to coordinates list after 2 seconds
+      setTimeout(() => {
+        router.push('/employees');
+      }, 2000);
             
             if ('data' in response && response.data) {
                 setSuccess("Employee created successfully!");

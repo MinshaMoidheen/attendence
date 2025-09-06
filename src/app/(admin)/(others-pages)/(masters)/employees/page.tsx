@@ -3,10 +3,11 @@
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import ComponentCard from "@/components/common/ComponentCard";
 import BasicTableOne, { Column } from "@/components/tables/BasicTableOne";
-import { useGetAllUserQuery } from "@/store/userApiSlice";
+import { useGetAllUserQuery, useDeleteUserMutation } from "@/store/userApiSlice";
 import { useState } from "react";
 import Button from "@/components/ui/button/Button";
 import Alert from "@/components/ui/alert/Alert";
+import Link from "next/link";
 
 interface Employee {
   id: string; // Add id field for BasicTableOne compatibility
@@ -50,7 +51,22 @@ export default function Employees() {
     limit 
   });
 
+  const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
+
   console.log("apiResponse",apiResponse)
+
+  const handleDelete = async (userId: string) => {
+    if (window.confirm("Are you sure you want to delete this employee?")) {
+      try {
+        console.log("userId", userId);
+        await deleteUser(userId).unwrap();
+        refetch();
+      } catch (error) {
+        console.error("Error deleting employee:", error);
+        alert("Failed to delete employee. Please try again.");
+      }
+    }
+  };
 
   const columns: Column<Employee>[] = [
     { 
@@ -107,20 +123,22 @@ export default function Employees() {
       accessor: "_id",
       render: (id) => (
         <div className="flex space-x-2">
+          <Link href={`/employees/edit/${id}`}>
+            <Button
+              variant="outline"
+              size="sm"
+            >
+              Edit
+            </Button>
+          </Link>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => console.log("Edit", id)}
+            onClick={() => handleDelete(id)}
+            disabled={isDeleting}
+            className="text-red-600 hover:text-red-700 disabled:opacity-50"
           >
-            Edit
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => console.log("Delete", id)}
-            className="text-red-600 hover:text-red-700"
-          >
-            Delete
+            {isDeleting ? "Deleting..." : "Delete"}
           </Button>
         </div>
       )
